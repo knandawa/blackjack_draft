@@ -1,0 +1,140 @@
+%% BLACKJACK GAME
+clear
+clc
+
+disp('Hello! Welcome to Blackjack')
+
+%% Player input
+numPlayers = input('How many players? ');
+
+for i = 1:numPlayers
+    players(i).NAME = input(['Enter name for Player ' num2str(i) ': '], 's');
+    players(i).HAND = [];
+    players(i).HANDVALUE = 0;
+end
+
+%% Initialize deck and dealer
+myDeck = initDeck();
+myDeck = shuffleDeck(myDeck);
+
+dealer.HAND = [];
+dealer.HANDVALUE = 0;
+
+%% Initial deal (2 cards each)
+for round = 1:2
+    for i = 1:numPlayers
+        [card, myDeck] = dealCard(myDeck);
+        players(i).HAND = [players(i).HAND card];
+    end
+
+    [card, myDeck] = dealCard(myDeck);
+    dealer.HAND = [dealer.HAND card];
+end
+
+%% Show initial hands
+for i = 1:numPlayers
+    disp([players(i).NAME ' has:'])
+    for k = 1:length(players(i).HAND)
+        disp(['  ' players(i).HAND(k).rankCard ...
+              ' of ' players(i).HAND(k).suitCard])
+    end
+end
+
+disp('Dealer shows:')
+disp(['  ' dealer.HAND(1).rankCard ' of ' dealer.HAND(1).suitCard])
+
+%% Player turns
+for i = 1:numPlayers
+    disp(['--- ' players(i).NAME '''s turn ---'])
+    done = false;
+
+    while ~done
+        players(i).HANDVALUE = evaluateHand(players(i).HAND);
+        disp(['Hand value: ' num2str(players(i).HANDVALUE)])
+
+        if players(i).HANDVALUE > 21
+            disp('BUST!')
+            break
+        end
+
+        choice = input('Hit or Stand? (h/s): ', 's');
+
+        if lower(choice) == 'h'
+            [card, myDeck] = dealCard(myDeck);
+            players(i).HAND = [players(i).HAND card];
+        else
+            done = true;
+        end
+    end
+end
+
+%% Dealer turn
+disp('--- Dealer turn ---')
+dealer.HANDVALUE = evaluateHand(dealer.HAND);
+
+while dealer.HANDVALUE < 17
+    [card, myDeck] = dealCard(myDeck);
+    dealer.HAND = [dealer.HAND card];
+    dealer.HANDVALUE = evaluateHand(dealer.HAND);
+end
+
+disp(['Dealer hand value: ' num2str(dealer.HANDVALUE)])
+
+%% Determine results
+for i = 1:numPlayers
+    disp(['Result for ' players(i).NAME ':'])
+
+    if players(i).HANDVALUE > 21
+        disp('Player busts — loses.')
+    elseif dealer.HANDVALUE > 21 || players(i).HANDVALUE > dealer.HANDVALUE
+        disp('Player wins!')
+    elseif players(i).HANDVALUE == dealer.HANDVALUE
+        disp('Push (tie).')
+    else
+        disp('Dealer wins.')
+    end
+end
+
+%% Local Functions
+
+function myDeck = initDeck()
+    suits = {'Diamonds','Hearts','Spades','Clubs'};
+    ranks = {'2','3','4','5','6','7','8','9','10','J','Q','K','A'};
+    index = 1;
+
+    for s = 1:length(suits)
+        for r = 1:length(ranks)
+            myDeck(index).suitCard = suits{s};
+            myDeck(index).rankCard = ranks{r};
+
+            if r <= 9
+                myDeck(index).cardValue = r + 1;
+            elseif r <= 12
+                myDeck(index).cardValue = 10;
+            else
+                myDeck(index).cardValue = 11;
+            end
+
+            index = index + 1;
+        end
+    end
+end
+
+function shuffledDeck = shuffleDeck(myDeck)
+    shuffledDeck = myDeck(randperm(length(myDeck)));
+end
+
+function [card, myDeck] = dealCard(myDeck)
+    card = myDeck(1);
+    myDeck(1) = [];
+end
+
+function handValue = evaluateHand(hand)
+    handValue = sum([hand.cardValue]);
+    numAces = sum(strcmp({hand.rankCard}, 'A'));
+
+    while handValue > 21 && numAces > 0
+        handValue = handValue - 10;
+        numAces = numAces - 1;
+    end
+end
