@@ -45,7 +45,7 @@ disp(['  ' dealer.HAND(1).rankCard ' of ' dealer.HAND(1).suitCard])
 
 %% Player turns
 for i = 1:numPlayers
-    disp(['--- ' players(i).NAME '''s turn ---'])
+    disp([players(i).NAME '''s turn'])
     done = false;
 
     while ~done
@@ -69,7 +69,7 @@ for i = 1:numPlayers
 end
 
 %% Dealer turn
-disp('--- Dealer turn ---')
+disp('Dealer turn ')
 dealer.HANDVALUE = evaluateHand(dealer.HAND);
 
 while dealer.HANDVALUE < 17
@@ -85,7 +85,7 @@ for i = 1:numPlayers
     disp(['Result for ' players(i).NAME ':'])
 
     if players(i).HANDVALUE > 21
-        disp('Player busts — loses.')
+        disp('Bust! ' + player(i)NAME + ' loses.')
     elseif dealer.HANDVALUE > 21 || players(i).HANDVALUE > dealer.HANDVALUE
         disp('Player wins!')
     elseif players(i).HANDVALUE == dealer.HANDVALUE
